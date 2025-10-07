@@ -298,35 +298,33 @@ Sync işlemini hızlandırmak için snapshot kullanabilirsiniz:
 ### Snapshot İndirme ve Kurulum
 
 ```bash
-# 1. Snapshot dizini oluştur
-mkdir -p ~/snapshot
-cd ~/snapshot
+# 1. lz4 kurulumu
+sudo apt update
+sudo apt-get install snapd lz4 -y
 
-# 2. Snapshot indir
-SNAPSHOT_URL="https://vault2.astrostake.xyz/testnet/safrochain/safrochain_testnet_snapshot.tar.lz4"
-wget "$SNAPSHOT_URL"
-
-# 3. Servisi durdur
+# 2. Servisi durdur ve state'i yedekle
 sudo systemctl stop safrochaind
-
-# 4. Validator state'i yedekle (ÖNEMLİ!)
 cp $HOME/.safrochain/data/priv_validator_state.json $HOME/.safrochain/priv_validator_state.json.backup
 
-# 5. Eski data'yı sil
+# 3. Eski data'yı temizle
 rm -rf $HOME/.safrochain/data
+safrochaind tendermint unsafe-reset-all --home ~/.safrochain/ --keep-addr-book
 
-# 6. Snapshot'ı çıkar
-lz4 -c -d safrochain_testnet_snapshot.tar.lz4 | tar -x -C $HOME/.safrochain
+# 4. Snapshot'ı indir (NodeStake snapshot - her 12 saatte güncellenir)
+SNAP_NAME=$(curl -s https://ss-t.safrochain.nodestake.org/ | egrep -o ">20.*\.tar.lz4" | tr -d ">")
+curl -o - -L https://ss-t.safrochain.nodestake.org/${SNAP_NAME} | lz4 -c -d - | tar -x -C $HOME/.safrochain
 
-# 7. Validator state'i geri yükle
+# 5. Validator state'i geri yükle
 mv $HOME/.safrochain/priv_validator_state.json.backup $HOME/.safrochain/data/priv_validator_state.json
 
-# 8. Servisi başlat
+# 6. Servisi başlat
 sudo systemctl restart safrochaind
 
-# 9. Logları kontrol et
+# 7. Logları kontrol et
 sudo journalctl -fu safrochaind -o cat
 ```
+
+**NOT:** Snapshot her 12 saatte bir güncellenir. Eğer snapshot indirme başarısız olursa, normal sync ile devam edebilirsiniz.
 
 ## 👤 Validator İşlemleri
 
