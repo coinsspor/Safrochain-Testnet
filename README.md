@@ -135,8 +135,62 @@ else
     echo "Binary otomatik bulunamadı, manuel kopyalayın"
 fi
 
-# Kurulumu doğrula
-$HOME/.safrochain/cosmovisor/genesis/bin/safrochaind version
+# WASM desteği kontrolü ve libwasmvm kurulumu
+echo "Binary bağımlılıkları kontrol ediliyor..."
+if ldd $HOME/.safrochain/cosmovisor/genesis/bin/safrochaind 2>/dev/null | grep -q wasmvm; then
+    echo "📦 WASM desteği tespit edildi. libwasmvm yükleniyor..."
+    
+    # Önce sistemde var mı kontrol et
+    if [ ! -f "/usr/lib/libwasmvm.x86_64.so" ] && [ ! -f "/usr/lib/x86_64-linux-gnu/libwasmvm.x86_64.so" ]; then
+        # Farklı versiyonları dene
+        WASMVM_VERSION="v2.1.3"
+        wget -q "https://github.com/CosmWasm/wasmvm/releases/download/${WASMVM_VERSION}/libwasmvm.x86_64.so" -O /tmp/libwasmvm.x86_64.so
+        
+        if [ ! -f "/tmp/libwasmvm.x86_64.so" ]; then
+            echo "v2.1.3 bulunamadı, v2.0.1 deneniyor..."
+            WASMVM_VERSION="v2.0.1"
+            wget -q "https://github.com/CosmWasm/wasmvm/releases/download/${WASMVM_VERSION}/libwasmvm.x86_64.so" -O /tmp/libwasmvm.x86_64.so
+        fi
+        
+        if [ -f "/tmp/libwasmvm.x86_64.so" ]; then
+            sudo mv /tmp/libwasmvm.x86_64.so /usr/lib/
+            sudo ldconfig
+            echo "✅ libwasmvm ${WASMVM_VERSION} başarıyla yüklendi"
+        else
+            echo "⚠️ libwasmvm indirilemedi, manuel kurulum gerekebilir"
+        fi
+    else
+        echo "✅ libwasmvm zaten yüklü"
+    fi
+fi
+
+# Diğer eksik kütüphaneleri kontrol et
+MISSING_LIBS=$(ldd $HOME/.safrochain/cosmovisor/genesis/bin/safrochaind 2>/dev/null | grep "not found" | awk '{print $1}')
+if [ -n "$MISSING_LIBS" ]; then
+    echo "⚠️ Eksik kütüphaneler tespit edildi:"
+    echo "$MISSING_LIBS"
+    echo "Sistem kütüphanelerini güncelliyorum..."
+    sudo apt update && sudo apt install -y build-essential libc6-dev libssl-dev
+    sudo ldconfig
+fi
+
+# Binary'yi test et
+echo "Binary test ediliyor..."
+if $HOME/.safrochain/cosmovisor/genesis/bin/safrochaind version 2>/dev/null; then
+    echo "✅ Binary başarıyla çalışıyor"
+else
+    echo "⚠️ Binary çalışmıyor. Olası çözümler:"
+    echo "1. libwasmvm versiyonunu kontrol edin"
+    echo "2. CGO_ENABLED=1 ile yeniden derleyin"
+    echo "3. ldd ile eksik kütüphaneleri kontrol edin"
+    
+    # Alternatif derleme önerisi
+    echo ""
+    echo "Alternatif derleme komutları:"
+    echo "CGO_ENABLED=1 make install"
+    echo "veya"
+    echo "go build -tags 'netgo ledger' ./cmd/safrochaind"
+fi
 ```
 
 ### 6️⃣ Symlink Oluşturma
