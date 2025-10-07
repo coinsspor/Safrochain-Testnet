@@ -1,11 +1,11 @@
-# 🌌 SAFROCHAIN Node Kurulum Rehberi
+# 🌌 SAFROCHAIN_SOURCE Node Kurulum Rehberi
 
 ![Cosmos SDK](https://img.shields.io/badge/Cosmos%20SDK-Compatible-blue)
 ![Ubuntu](https://img.shields.io/badge/Ubuntu-20.04%2F22.04-orange)
 ![Go](https://img.shields.io/badge/Go-1.23.0-00ADD8)
 ![Cosmovisor](https://img.shields.io/badge/Cosmovisor-Latest-green)
 
-Bu rehber, **safrochain** blockchain node'unuzun Cosmovisor ile profesyonel kurulumunu adım adım açıklar.
+Bu rehber, **safrochain_source** blockchain node'unuzun Cosmovisor ile profesyonel kurulumunu adım adım açıklar.
 
 ## 📋 İçindekiler
 
@@ -34,14 +34,14 @@ Bu rehber, **safrochain** blockchain node'unuzun Cosmovisor ile profesyonel kuru
 
 | Parametre | Değer |
 |-----------|-------|
-| **Proje Adı** | safrochain |
+| **Proje Adı** | safrochain_source |
 | **Chain ID** | `safro-testnet-1` |
 | **Daemon Adı** | `safrochaind` |
 | **Moniker** | `coinsspor` |
 | **Go Versiyonu** | 1.23.0 |
 | **Cosmovisor Versiyonu** | latest |
 | **Port Prefix** | 53 |
-| **Home Directory** | `$HOME/.safrochain` |
+| **Home Directory** | `$HOME/.safrochain_source` |
 
 ## 🔌 Port Konfigürasyonu
 
@@ -97,8 +97,8 @@ go install cosmossdk.io/tools/cosmovisor/cmd/cosmovisor@latest
 ### 4️⃣ Dizin Yapısını Oluşturma
 
 ```bash
-mkdir -p $HOME/.safrochain/cosmovisor/genesis/bin
-mkdir -p $HOME/.safrochain/cosmovisor/upgrades
+mkdir -p $HOME/.safrochain_source/cosmovisor/genesis/bin
+mkdir -p $HOME/.safrochain_source/cosmovisor/upgrades
 ```
 
 ### 5️⃣ Binary Kurulumu
@@ -107,20 +107,20 @@ mkdir -p $HOME/.safrochain/cosmovisor/upgrades
 
 ```bash
 cd $HOME
-git clone https://github.com/Safrochain-Org/safrochain-node.git safrochain_source
-cd safrochain_source
+git clone https://github.com/Safrochain-Org/safrochain-node.git safrochain_source_source
+cd safrochain_source_source
 git checkout v0.1.0
 make install
 
 # Binary'yi cosmovisor dizinine kopyalama
-cp $HOME/go/bin/safrochaind $HOME/.safrochain/cosmovisor/genesis/bin/
+cp $HOME/go/bin/safrochaind $HOME/.safrochain_source/cosmovisor/genesis/bin/
 ```
 
 ### 6️⃣ Symlink Oluşturma
 
 ```bash
-sudo ln -s $HOME/.safrochain/cosmovisor/genesis $HOME/.safrochain/cosmovisor/current -f
-sudo ln -s $HOME/.safrochain/cosmovisor/current/bin/safrochaind /usr/local/bin/safrochaind -f
+sudo ln -s $HOME/.safrochain_source/cosmovisor/genesis $HOME/.safrochain_source/cosmovisor/current -f
+sudo ln -s $HOME/.safrochain_source/cosmovisor/current/bin/safrochaind /usr/local/bin/safrochaind -f
 ```
 
 ### 7️⃣ Node Başlatma ve Konfigürasyon
@@ -141,12 +141,12 @@ safrochaind init "coinsspor" --chain-id safro-testnet-1
 
 #### Genesis Dosyası
 ```bash
-wget "https://vault2.astrostake.xyz/testnet/safrochain/genesis.json" -O $HOME/.safrochain/config/genesis.json
+wget "https://vault2.astrostake.xyz/testnet/safrochain/genesis.json" -O $HOME/.safrochain_source/config/genesis.json
 ```
 
 #### Addrbook Dosyası
 ```bash
-wget "https://vault2.astrostake.xyz/testnet/safrochain/addrbook.json" -O $HOME/.safrochain/config/addrbook.json
+wget "https://vault2.astrostake.xyz/testnet/safrochain/addrbook.json" -O $HOME/.safrochain_source/config/addrbook.json
 ```
 
 ### 🌐 Network Konfigürasyonu
@@ -154,13 +154,13 @@ wget "https://vault2.astrostake.xyz/testnet/safrochain/addrbook.json" -O $HOME/.
 #### Persistent Peers
 ```bash
 PEERS="70a40a48577174a95ef920fcc894bc048929ce80@5.189.147.191:26656,b4b711560e62b3a850193f3fa85c82e6ccf4c013@135.181.178.120:12656"
-sed -i -e "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" $HOME/.safrochain/config/config.toml
+sed -i -e "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" $HOME/.safrochain_source/config/config.toml
 ```
 
 ### ⛽ Gas Price Ayarı
 
 ```bash
-sed -i -e "s|^minimum-gas-prices *=.*|minimum-gas-prices = \"0.001usaf\"|" $HOME/.safrochain/config/app.toml
+sed -i -e "s|^minimum-gas-prices *=.*|minimum-gas-prices = \"0.001usaf\"|" $HOME/.safrochain_source/config/app.toml
 ```
 
 ## ⚙️ Yapılandırma Detayları
@@ -174,23 +174,23 @@ sed -i \
   -e 's|^pruning-keep-recent *=.*|pruning-keep-recent = "100"|' \
   -e 's|^pruning-keep-every *=.*|pruning-keep-every = "0"|' \
   -e 's|^pruning-interval *=.*|pruning-interval = "19"|' \
-  $HOME/.safrochain/config/app.toml
+  $HOME/.safrochain_source/config/app.toml
 ```
 
 ### 📸 Snapshot Kurulumu
 
 ```bash
 # Validator state'ini yedekleme
-mv $HOME/.safrochain/data/priv_validator_state.json $HOME/.safrochain/priv_validator_state.json.backup
+mv $HOME/.safrochain_source/data/priv_validator_state.json $HOME/.safrochain_source/priv_validator_state.json.backup
 
 # Mevcut verileri temizleme
-safrochaind tendermint unsafe-reset-all --home $HOME/.safrochain --keep-addr-book
+safrochaind tendermint unsafe-reset-all --home $HOME/.safrochain_source --keep-addr-book
 
 # Snapshot'ı indirme ve açma
-curl -L https://vault2.astrostake.xyz/testnet/safrochain/safrochain_testnet_snapshot.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.safrochain
+curl -L https://vault2.astrostake.xyz/testnet/safrochain/safrochain_testnet_snapshot.tar.lz4 | lz4 -dc - | tar -xf - -C $HOME/.safrochain_source
 
 # Validator state'ini geri yükleme
-cp $HOME/.safrochain/priv_validator_state.json.backup $HOME/.safrochain/data/priv_validator_state.json
+cp $HOME/.safrochain_source/priv_validator_state.json.backup $HOME/.safrochain_source/data/priv_validator_state.json
 ```
 
 ## 🔧 Port Değiştirme
@@ -206,24 +206,24 @@ sed -i.bak -e "s%:26658%:${CUSTOM_PORT}658%g; \
 s%:26657%:${CUSTOM_PORT}657%g; \
 s%:6060%:${CUSTOM_PORT}060%g; \
 s%:26656%:${CUSTOM_PORT}656%g; \
-s%:26660%:${CUSTOM_PORT}660%g" $HOME/.safrochain/config/config.toml
+s%:26660%:${CUSTOM_PORT}660%g" $HOME/.safrochain_source/config/config.toml
 
 # External address güncelleme (Public node'lar için)
-sed -i -e "s%^external_address = \"\".*%external_address = \"$(wget -qO- eth0.me):${CUSTOM_PORT}656\"%g" $HOME/.safrochain/config/config.toml
+sed -i -e "s%^external_address = \"\".*%external_address = \"$(wget -qO- eth0.me):${CUSTOM_PORT}656\"%g" $HOME/.safrochain_source/config/config.toml
 
 # app.toml dosyasındaki portları değiştirme
 sed -i.bak -e "s%:1317%:${CUSTOM_PORT}317%g; \
 s%:8080%:${CUSTOM_PORT}080%g; \
 s%:9090%:${CUSTOM_PORT}090%g; \
-s%:9091%:${CUSTOM_PORT}091%g" $HOME/.safrochain/config/app.toml
+s%:9091%:${CUSTOM_PORT}091%g" $HOME/.safrochain_source/config/app.toml
 
 # EVM uyumlu chainler için ek portlar (varsa)
 # sed -i -e "s%:8545%:${CUSTOM_PORT}545%g; \
 # s%:8546%:${CUSTOM_PORT}546%g; \
-# s%:6065%:${CUSTOM_PORT}065%g" $HOME/.safrochain/config/app.toml
+# s%:6065%:${CUSTOM_PORT}065%g" $HOME/.safrochain_source/config/app.toml
 
 # client.toml dosyasını güncelleme
-sed -i -e "s%localhost:26657%localhost:${CUSTOM_PORT}657%g" $HOME/.safrochain/config/client.toml
+sed -i -e "s%localhost:26657%localhost:${CUSTOM_PORT}657%g" $HOME/.safrochain_source/config/client.toml
 
 # Node yapılandırmasını güncelleme
 safrochaind config node tcp://localhost:${CUSTOM_PORT}657
@@ -238,7 +238,7 @@ safrochaind config node tcp://localhost:${CUSTOM_PORT}657
 ```bash
 sudo tee /etc/systemd/system/safrochaind.service > /dev/null <<EOF
 [Unit]
-Description=safrochain node service
+Description=safrochain_source node service
 After=network-online.target
 
 [Service]
@@ -247,12 +247,12 @@ ExecStart=$(which cosmovisor) run start
 Restart=on-failure
 RestartSec=10
 LimitNOFILE=65535
-Environment="DAEMON_HOME=$HOME/.safrochain"
+Environment="DAEMON_HOME=$HOME/.safrochain_source"
 Environment="DAEMON_NAME=safrochaind"
 Environment="DAEMON_RESTART_AFTER_UPGRADE=true"
 Environment="DAEMON_ALLOW_DOWNLOAD_BINARIES=false"
 Environment="UNSAFE_SKIP_BACKUP=true"
-Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:$HOME/.safrochain/cosmovisor/current/bin"
+Environment="PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:$HOME/.safrochain_source/cosmovisor/current/bin"
 
 [Install]
 WantedBy=multi-user.target
@@ -274,7 +274,7 @@ Eğer node'unuz peer bulamıyorsa veya mevcut peer'lerinizi güncellemek isterse
 ```bash
 # RPC URL'sini ve node dizinini projenize göre ayarlayın
 RPC="RPC_URL_BURAYA"  # Örnek: https://cosmos-rpc.polkachu.com
-NODE_HOME="$HOME/.safrochain"
+NODE_HOME="$HOME/.safrochain_source"
 
 # Peer güncelleme komutu
 sed -i "s/^persistent_peers *=.*/persistent_peers = \"$(curl -s $RPC/net_info | jq -r '.result.peers[] | select(.node_info.listen_addr | contains(":")) | .node_info.id + "@" + .remote_ip + ":" + (.node_info.listen_addr | split(":")[2])' | grep -v ":$" | tr '\n' ',' | sed 's/,$//')\"/" $NODE_HOME/config/config.toml
@@ -286,7 +286,7 @@ sudo systemctl restart safrochaind
 > **💡 Not:** RPC URL'sini projenize uygun bir public RPC sunucusundan alabilirsiniz. Örneğin:
 > - Cosmos Hub: `https://cosmos-rpc.polkachu.com`
 > - Osmosis: `https://osmosis-rpc.polkachu.com`
-> - safrochain: Projenizin RPC URL'sini buraya yazın
+> - safrochain_source: Projenizin RPC URL'sini buraya yazın
 
 ## 📝 Faydalı Komutlar
 
@@ -373,8 +373,8 @@ safrochaind query staking validator $(safrochaind keys show wallet --bech val -a
 1. **Düzenli Yedekleme**
    ```bash
    # Validator key yedekleme
-   cp $HOME/.safrochain/config/priv_validator_key.json ~/validator_key_backup.json
-   cp $HOME/.safrochain/data/priv_validator_state.json ~/validator_state_backup.json
+   cp $HOME/.safrochain_source/config/priv_validator_key.json ~/validator_key_backup.json
+   cp $HOME/.safrochain_source/data/priv_validator_state.json ~/validator_state_backup.json
    ```
 
 2. **Firewall Kuralları**
@@ -409,7 +409,7 @@ safrochaind query staking validator $(safrochaind keys show wallet --bech val -a
 curl -s localhost:53657/net_info | jq .result.n_peers
 
 # Genesis hash kontrolü
-sha256sum $HOME/.safrochain/config/genesis.json
+sha256sum $HOME/.safrochain_source/config/genesis.json
 ```
 
 ### Port Çakışması
@@ -426,7 +426,7 @@ sudo lsof -i -P -n | grep LISTEN
 df -h
 
 # Node veri boyutu
-du -sh $HOME/.safrochain/
+du -sh $HOME/.safrochain_source/
 ```
 
 ## 📚 Ek Kaynaklar
