@@ -151,10 +151,10 @@ wget "https://vault2.astrostake.xyz/testnet/safrochain/addrbook.json" -O $HOME/.
 
 ### 🌐 Network Konfigürasyonu
 
-#### Seed Nodes
+#### Persistent Peers
 ```bash
-SEEDS="70a40a48577174a95ef920fcc894bc048929ce80@5.189.147.191:26656,b4b711560e62b3a850193f3fa85c82e6ccf4c013@135.181.178.120:12656"
-sed -i -e "s/^seeds *=.*/seeds = \"$SEEDS\"/" $HOME/.safrochain/config/config.toml
+PEERS="70a40a48577174a95ef920fcc894bc048929ce80@5.189.147.191:26656,b4b711560e62b3a850193f3fa85c82e6ccf4c013@135.181.178.120:12656"
+sed -i -e "s/^persistent_peers *=.*/persistent_peers = \"$PEERS\"/" $HOME/.safrochain/config/config.toml
 ```
 
 ### ⛽ Gas Price Ayarı
