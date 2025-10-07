@@ -464,8 +464,77 @@ safrochaind tx bank send $(safrochaind keys show $WALLET_NAME -a) <alıcı_adres
 
 ## 📊 Node Durumu ve Bilgileri
 
+### Sync Durumu Kontrol Scripti
+
+Sync durumunu sürekli takip etmek için bu scripti kullanabilirsiniz:
+
 ```bash
-# Sync durumu
+# Sync kontrol scripti oluştur
+cat > ~/safro_sync_check.sh << 'EOF'
+#!/bin/bash
+# Safrochain Sync Status Checker
+
+# RPC portunu config'den al
+rpc_port=$(grep -m 1 -oP '^laddr = "\K[^"]+' "$HOME/.safrochain/config/config.toml" | cut -d ':' -f 3)
+
+# Renkler
+RED='\033[1;31m'
+YELLOW='\033[1;33m'
+BLUE='\033[1;34m'
+CYAN='\033[1;36m'
+GREEN='\033[1;32m'
+NC='\033[0m' # No Color
+
+while true; do
+  # Local node height
+  local_height=$(curl -s localhost:$rpc_port/status 2>/dev/null | jq -r '.result.sync_info.latest_block_height')
+  
+  # Network height (LinkNode RPC)
+  network_height=$(curl -s https://safrochain-testnet-rpc.linknode.org/status 2>/dev/null | jq -r '.result.sync_info.latest_block_height')
+  
+  # Hata kontrolü
+  if ! [[ "$local_height" =~ ^[0-9]+$ ]] || ! [[ "$network_height" =~ ^[0-9]+$ ]]; then
+    echo -e "${RED}Error: Invalid block height data. Retrying...${NC}"
+    sleep 5
+    continue
+  fi
+  
+  # Kalan blok hesapla
+  blocks_left=$((network_height - local_height))
+  
+  # Sync durumu
+  if [ "$blocks_left" -eq 0 ]; then
+    sync_status="${GREEN}SYNCED${NC}"
+  else
+    sync_status="${YELLOW}SYNCING${NC}"
+  fi
+  
+  # Durumu göster
+  echo -e "${YELLOW}Node Height:${BLUE} $local_height${NC} | ${YELLOW}Network Height:${CYAN} $network_height${NC} | ${YELLOW}Blocks Left:${RED} $blocks_left${NC} | Status: $sync_status"
+  
+  sleep 5
+done
+EOF
+
+# Scripti çalıştırılabilir yap
+chmod +x ~/safro_sync_check.sh
+
+# Çalıştır
+~/safro_sync_check.sh
+```
+
+Script 5 saniyede bir güncellenir ve size:
+- Node yüksekliğini
+- Network yüksekliğini  
+- Kalan blok sayısını
+- Sync durumunu (SYNCED/SYNCING)
+
+gösterir. Durdurmak için `CTRL+C` kullanın.
+
+### Diğer Faydalı Komutlar
+
+```bash
+# Sync durumu (tek seferlik)
 safrochaind status 2>&1 | jq .sync_info
 
 # Node ID
